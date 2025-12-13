@@ -1,0 +1,16 @@
+# Dependencies
+/node_modules
+
+# Log files
+npm-debug.log
+*.log
+
+# Data files (which might contain sensitive data or get huge)
+# Since these are JSON files acting as a database, you typically DO NOT commit them
+# in a real project, but for this demo, you might include them if they're small.
+# We will ignore them to follow best practices.
+blog.json
+user1.json
+
+# Uploads
+/uploads1

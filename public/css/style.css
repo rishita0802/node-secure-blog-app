@@ -1,0 +1,306 @@
+/* --- Deep Ocean Theme: Variables --- */
+:root {
+    --color-primary: #1A5276; /* Deep Ocean Blue */
+    --color-secondary: #27AE60; /* Vibrant Green Accent */
+    --color-background-dark: #1F2733; /* Dark Navy Background */
+    --color-background-light: #2A3340; /* Slightly Lighter Card Background */
+    --color-text-light: #ECF0F1; /* Light Gray Text */
+    --color-text-dim: #BDC3C7; /* Dim Gray for secondary text */
+    --color-danger: #E74C3C; /* Red for deletion/warning */
+    --color-success: #2ECC71; /* Success Green */
+    --color-border: rgba(255, 255, 255, 0.1);
+    --font-stack: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* --- Global Reset & Typography --- */
+body {
+    font-family: var(--font-stack);
+    background-color: var(--color-background-dark);
+    color: var(--color-text-light);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+h1, h2, h3 {
+    color: var(--color-text-light);
+    margin-top: 0;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+h4 {
+    color: var(--color-text-dim);
+}
+
+/* --- Header & Navigation --- */
+header {
+    background-color: var(--color-background-light);
+    color: white;
+    padding: 15px 5%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.8em;
+    font-weight: 700;
+    color: var(--color-secondary);
+}
+
+nav a {
+    color: var(--color-text-light);
+    text-decoration: none;
+    margin-left: 15px;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+    border: 1px solid transparent;
+}
+
+nav a:hover {
+    background-color: var(--color-primary);
+    color: white;
+    border-color: var(--color-secondary);
+}
+
+#welcome-message {
+    margin-right: 20px;
+    font-size: 0.9em;
+    color: var(--color-secondary);
+    font-weight: 500;
+}
+
+/* --- Cards (General containers) --- */
+.card {
+    background-color: var(--color-background-light);
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    margin-bottom: 25px;
+}
+
+/* --- Blog Post Styling --- */
+.blog-post {
+    border-left: 4px solid var(--color-secondary);
+    padding: 20px 20px 20px 30px;
+    transition: transform 0.2s;
+}
+
+.blog-post:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+}
+
+.blog-image {
+    max-width: 100%;
+    height: auto;
+    max-height: 350px;
+    border-radius: 8px;
+    margin: 15px 0;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+}
+
+.author {
+    font-size: 0.9em;
+    color: var(--color-text-dim);
+    margin-bottom: 10px;
+}
+
+/* --- Forms & Inputs --- */
+.form-container input:not([type="submit"]):not([type="button"]),
+.form-container textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px 0;
+    background-color: var(--color-background-dark);
+    color: var(--color-text-light);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.form-container input:focus,
+.form-container textarea:focus {
+    border-color: var(--color-secondary);
+    outline: none;
+}
+
+.form-container label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
+    color: var(--color-text-light);
+}
+
+/* --- Buttons --- */
+.btn, button {
+    background-color: var(--color-primary);
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    margin-right: 10px;
+    transition: background-color 0.3s, transform 0.1s;
+    font-weight: 600;
+}
+
+.btn:hover:not([disabled]), button:hover:not([disabled]) {
+    background-color: var(--color-secondary);
+}
+
+.btn:active:not([disabled]), button:active:not([disabled]) {
+    transform: scale(0.98);
+}
+
+button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn.primary, .comment-btn {
+    background-color: var(--color-primary);
+}
+
+.btn.danger, .danger {
+    background-color: var(--color-danger);
+}
+
+.btn.danger:hover, .danger:hover {
+    background-color: #C0392B;
+}
+
+/* --- Interactions (Like/Dislike) --- */
+.actions {
+    margin: 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.actions button {
+    background: var(--color-background-light);
+    color: var(--color-text-dim);
+    border: 1px solid var(--color-border);
+    padding: 8px 15px;
+    margin: 5px 5px 5px 0;
+}
+
+.actions button:hover:not(.active) {
+    background-color: var(--color-background-dark);
+    color: var(--color-secondary);
+}
+
+.actions button.active {
+    background-color: var(--color-secondary);
+    color: white;
+    border-color: var(--color-secondary);
+}
+
+/* --- Comments --- */
+.comments-section {
+    margin-top: 15px;
+    padding-top: 15px;
+}
+
+.comment-form {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.comment-input {
+    flex-grow: 1;
+    padding: 10px;
+    background-color: var(--color-background-dark);
+    color: var(--color-text-light);
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.comment-btn {
+    padding: 10px 15px;
+    flex-shrink: 0;
+}
+
+.comment-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding-right: 10px;
+}
+
+.comment-item {
+    background-color: var(--color-background-dark);
+    padding: 8px 12px;
+    margin: 8px 0;
+    border-radius: 4px;
+    font-size: 0.9em;
+    border-left: 3px solid var(--color-primary);
+}
+
+.login-prompt {
+    color: var(--color-text-dim);
+    font-style: italic;
+    margin-top: 15px;
+}
+
+/* --- Messages & Utilities --- */
+.error-message {
+    color: var(--color-danger);
+    font-weight: bold;
+}
+
+.empty-message {
+    color: var(--color-text-dim);
+    font-style: italic;
+    text-align: center;
+    padding: 40px;
+    border: 1px dashed var(--color-border);
+    border-radius: 8px;
+}
+
+#loading-indicator {
+    display: none;
+    text-align: center;
+    color: var(--color-secondary);
+    padding: 20px;
+}
+
+/* --- Admin Controls (Danger Zone) --- */
+.admin-controls {
+    border: 1px solid var(--color-danger);
+    background-color: rgba(231, 76, 60, 0.1); /* Light red tint */
+    margin-top: 30px;
+}
+.admin-controls h2 {
+    color: var(--color-danger);
+    border-bottom-color: var(--color-danger);
+}
+
+/* --- Specific Authentication Page Styling --- */
+main.card {
+    margin-top: 10vh;
+    max-width: 500px;
+    text-align: center;
+}
+main.card h1 {
+    text-align: left;
+}
+main.card p {
+    margin-top: 20px;
+    color: var(--color-text-dim);
+}

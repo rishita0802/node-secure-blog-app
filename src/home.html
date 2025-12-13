@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Feed</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="logo">NodeBlog</div>
+        <nav>
+            <span id="welcome-message"></span>
+            <a href="/" class="nav-link">Home</a>
+            <a href="/login" id="auth-link" class="nav-link">Login</a>
+            <a href="/signup" id="signup-link" class="nav-link">Signup</a>
+            <a href="/user/dashboard" id="create-link" class="nav-link" style="display:none;">Create Post</a>
+            <a href="/admin/dashboard" id="admin-link" class="nav-link" style="display:none;">Admin Panel</a>
+            <a href="/logout" id="logout-link" class="nav-link" style="display:none;">Logout</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h2>Latest Blogs</h2>
+        <p id="loading-indicator">Loading blogs...</p>
+        <div id="blogs"></div>
+    </main>
+
+    <script>
+        let currentUser = null;
+
+        async function handleResponse(res) {
+            if (!res.ok) {
+                const contentType = res.headers.get("content-type");
+                let errorMessage = `Server responded with status ${res.status}`;
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await res.json();
+                    errorMessage = data.message || data.error || errorMessage;
+                } else {
+                    errorMessage = await res.text();
+                }
+                if (res.status === 401) {
+                    // Alert, but don't redirect, as logged-out users can view
+                    alert(`Action failed: ${errorMessage}. Please log in to interact.`);
+                } else {
+                    alert(`Error: ${errorMessage}`);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        function updateAuthUI() {
+            const welcome = document.getElementById('welcome-message');
+            const authLink = document.getElementById('auth-link');
+            const signupLink = document.getElementById('signup-link');
+            const logoutLink = document.getElementById('logout-link');
+            const createLink = document.getElementById('create-link');
+            const adminLink = document.getElementById('admin-link');
+
+            if (currentUser) {
+                welcome.textContent = `Welcome, ${currentUser.name || currentUser.email}!`;
+                authLink.style.display = 'none';
+                signupLink.style.display = 'none';
+                logoutLink.style.display = 'inline';
+                createLink.style.display = 'inline';
+                adminLink.style.display = currentUser.role === 'admin' ? 'inline' : 'none';
+            } else {
+                welcome.textContent = 'Welcome Guest!';
+                authLink.style.display = 'inline';
+                signupLink.style.display = 'inline';
+                logoutLink.style.display = 'none';
+                createLink.style.display = 'none';
+                adminLink.style.display = 'none';
+            }
+        }
+
+        function createBlogElement(blog) {
+            const isLoggedIn = !!currentUser;
+            const isAuthor = isLoggedIn && blog.author === currentUser.email;
+            const isAdmin = isLoggedIn && currentUser.role === 'admin';
+            const isLiked = isLoggedIn && blog.likes.includes(currentUser.email);
+            const isDisliked = isLoggedIn && blog.dislikes.includes(currentUser.email);
+            
+            const div = document.createElement("div");
+            div.className = "blog-post card";
+            div.setAttribute('data-id', blog.id);
+
+            const commentsHtml = blog.comments.map(c => 
+                `<p class="comment-item"><b>${c.email}:</b> ${c.comment}</p>`
+            ).join("");
+            
+            div.innerHTML = `
+                <h3>${blog.title}</h3>
+                <p class="author">By: ${blog.authorName} (${blog.author})</p>
+                ${blog.image ? `<img src="/uploads1/${blog.image}" alt="${blog.title}" class="blog-image">` : ''} 
+                <p>${blog.desc}</p>
+                
+                <div class="actions">
+                    <button class="like-btn ${isLiked ? 'active' : ''}" data-id="${blog.id}" ${!isLoggedIn ? 'disabled' : ''}>
+                        👍 <span class="like-count">${blog.likes.length}</span>
+                    </button>
+                    <button class="dislike-btn ${isDisliked ? 'active' : ''}" data-id="${blog.id}" ${!isLoggedIn ? 'disabled' : ''}>
+                        👎 <span class="dislike-count">${blog.dislikes.length}</span>
+                    </button>
+                    ${(isAuthor || isAdmin) ? `<button class="delete-btn btn danger" data-id="${blog.id}">Delete</button>` : ''}
+                </div>
+
+                <div class="comments-section">
+                    <h4>Comments (${blog.comments.length})</h4>
+                    <div class="comment-list">${commentsHtml}</div>
+                    ${isLoggedIn ? `
+                        <div class="comment-form">
+                            <input type="text" placeholder="Add a comment..." data-id="${blog.id}-input" class="comment-input">
+                            <button class="comment-btn btn primary" data-id="${blog.id}">Post Comment</button>
+                        </div>` : `<p class="login-prompt">Log in to like, comment, or delete posts.</p>`}
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        async function fetchBlogs() {
+            try {
+                document.getElementById('loading-indicator').style.display = 'block';
+                const res = await fetch("/blogs");
+                if (!res.ok) {
+                     document.getElementById("blogs").innerHTML = "<p class='error-message'>Error fetching blogs.</p>";
+                     return;
+                }
+                const data = await res.json();
+                currentUser = data.currentUser;
+                const blogs = data.blogs;
+
+                updateAuthUI(); 
+
+                const container = document.getElementById("blogs");
+                container.innerHTML = "";
+                document.getElementById('loading-indicator').style.display = 'none';
+
+                if (blogs.length === 0) {
+                     container.innerHTML = "<p class='empty-message'>No posts have been created yet.</p>";
+                     return;
+                }
+                
+                blogs.forEach(blog => {
+                    const blogElement = createBlogElement(blog);
+                    container.appendChild(blogElement);
+                });
+
+                // Attach event listeners
+                document.querySelectorAll('.like-btn').forEach(button => {
+                    button.onclick = (e) => handleInteraction(e, 'like');
+                });
+                document.querySelectorAll('.dislike-btn').forEach(button => {
+                    button.onclick = (e) => handleInteraction(e, 'dislike');
+                });
+                document.querySelectorAll('.delete-btn').forEach(button => {
+                    button.onclick = (e) => handleDelete(e);
+                });
+                document.querySelectorAll('.comment-btn').forEach(button => {
+                    button.onclick = (e) => handleComment(e);
+                });
+
+            } catch (error) {
+                console.error("Critical error in fetchBlogs:", error);
+                document.getElementById("blogs").innerHTML = "<p class='error-message'>Failed to load blog data due to a network error.</p>";
+            }
+        }
+        
+        async function handleInteraction(e, type) {
+             if (!currentUser) return alert("You must be logged in to like or dislike a post.");
+             const id = e.currentTarget.getAttribute("data-id");
+             try {
+                const res = await fetch(`/${type}/${id}`, { method: "POST" });
+                if (await handleResponse(res)) {
+                    fetchBlogs();
+                }
+             } catch (error) { console.error(`${type} error:`, error); }
+        }
+
+        async function handleDelete(e) {
+            const id = e.currentTarget.getAttribute("data-id");
+            if (!confirm(`Are you sure you want to delete post ID ${id}?`)) return;
+
+            try {
+                const res = await fetch(`/delete/${id}`, { method: "DELETE" });
+                if (await handleResponse(res)) {
+                    alert('Post deleted successfully!');
+                    fetchBlogs();
+                }
+            } catch (error) { console.error("Delete error:", error); }
+        }
+
+        async function handleComment(e) {
+            if (!currentUser) return alert("You must be logged in to comment.");
+            const id = e.currentTarget.getAttribute("data-id");
+            const commentInput = document.querySelector(`div[data-id="${id}"] .comment-input`);
+            const comment = commentInput.value.trim();
+            
+            if (!comment) return alert("Comment cannot be empty.");
+            
+            try {
+                const res = await fetch(`/comments/${id}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ comment })
+                });
+
+                if (await handleResponse(res)) {
+                    commentInput.value = "";
+                    fetchBlogs();
+                }
+            } catch (error) { console.error("Comment error:", error); }
+        }
+
+        fetchBlogs();
+    </script>
+</body>
+</html>

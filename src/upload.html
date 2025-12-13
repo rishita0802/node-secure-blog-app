@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Post</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="card">
+        <h1>Create New Blog Post</h1>
+        <nav>
+            <a href="/" class="nav-link">Back to Home Feed</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        <form id="blogForm" enctype="multipart/form-data" class="card form-container">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" required><br>
+            
+            <label for="desc">Description:</label>
+            <textarea id="desc" name="desc" required></textarea><br>
+            
+            <label for="pic">Image:</label>
+            <input type="file" id="pic" name="pic" required><br>
+            
+            <button type="submit" class="btn primary">Submit Post</button>
+            <p id="submit-message"></p>
+        </form>
+    </main>
+
+    <script>
+        async function handleResponse(res) {
+            if (!res.ok) {
+                const contentType = res.headers.get("content-type");
+                let errorMessage = `Server responded with status ${res.status}`;
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await res.json();
+                    errorMessage = data.message || data.error || errorMessage;
+                } else {
+                    errorMessage = await res.text();
+                }
+                if (res.status === 401) {
+                    alert(`Action failed: ${errorMessage}. Redirecting to login.`);
+                    window.location.href = '/login';
+                } else {
+                    alert(`Error: ${errorMessage}`);
+                }
+                return false;
+            }
+            return true;
+        }
+
+        document.getElementById("blogForm").onsubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitMessage = document.getElementById("submit-message");
+            submitMessage.textContent = "Submitting...";
+            submitMessage.style.color = "gray";
+
+            try {
+                const res = await fetch("/submit", { method: "POST", body: formData });
+                
+                if (await handleResponse(res)) {
+                    submitMessage.textContent = "Blog submitted successfully! Redirecting...";
+                    submitMessage.style.color = "green";
+                    form.reset();
+                    setTimeout(() => {
+                        window.location.href = '/'; 
+                    }, 1500);
+                } else {
+                    submitMessage.textContent = "Blog submission failed.";
+                    submitMessage.style.color = "red";
+                }
+            } catch (error) {
+                console.error("Submission network error:", error);
+                submitMessage.textContent = "Network error: Could not connect to server.";
+                submitMessage.style.color = "red";
+            }
+        };
+    </script>
+</body>
+</html>
