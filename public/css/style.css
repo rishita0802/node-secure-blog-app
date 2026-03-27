@@ -304,3 +304,26 @@ main.card p {
     margin-top: 20px;
     color: var(--color-text-dim);
 }
+.guest-mode {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+.active-like {
+    background-color: #e7f3ff !important;
+    border: 1px solid #007bff !important;
+    color: #007bff !important;
+}
+
+.active-dislike {
+    background-color: #fff0f0 !important;
+    border: 1px solid #ff4d4d !important;
+    color: #ff4d4d !important;
+}
+
+.single-comment {
+    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+    font-size: 14px;
+}

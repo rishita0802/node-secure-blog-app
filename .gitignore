@@ -14,3 +14,10 @@ user1.json
 
 # Uploads
 /uploads1
+
+
+/uploads1/*
+
+!/uploads1/.gitkeep
+
+.env

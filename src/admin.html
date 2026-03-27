@@ -1,131 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Dashboard</title>
+    <title>Admin Panel</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header class="card">
         <h1>Admin Dashboard</h1>
-        <nav>
-            <a href="/" class="nav-link">View All Blogs</a>
-            <a href="/user/dashboard" class="nav-link">Create Blog</a>
-            <a href="/logout" class="nav-link">Logout</a>
-        </nav>
+        <nav><a href="/" class="nav-link">Home Feed</a> | <a href="/logout">Logout</a></nav>
     </header>
-    
     <main class="container">
-        <section class="admin-controls card">
-            <h2>Danger Zone</h2>
-            <button id="deleteAllBtn" class="btn danger">Delete All Blog Posts (Admin Only)</button>
-            <p id="admin-message"></p>
-        </section>
-
-        <h2>All Posts for Review</h2>
-        <p id="loading-indicator">Loading posts for review...</p>
-        <div id="blogs"></div>
+        <h2>Manage All Posts</h2>
+        <div id="admin-blogs"></div>
     </main>
-
     <script>
-        async function handleResponse(res) {
-            if (!res.ok) {
-                const contentType = res.headers.get("content-type");
-                let errorMessage = `Server responded with status ${res.status}`;
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await res.json();
-                    errorMessage = data.message || data.error || errorMessage;
-                } else {
-                    errorMessage = await res.text();
-                }
-                if (res.status === 403) {
-                    alert(`Permission Denied: ${errorMessage}. Redirecting...`);
-                    window.location.href = '/user/dashboard';
-                } else {
-                    alert(`Error: ${errorMessage}`);
-                }
-                return false;
-            }
-            return true;
+        async function loadAdminBlogs() {
+            const res = await fetch("/blogs");
+            const data = await res.json();
+            const container = document.getElementById("admin-blogs");
+            container.innerHTML = data.blogs.map(b => `
+                <div class="card" style="margin-bottom:10px; padding:10px;">
+                    <span><b>${b.title}</b> by ${b.author}</span>
+                    <button onclick="deletePost(${b.id})" class="btn danger" style="float:right">Delete Any</button>
+                </div>
+            `).join("");
         }
-
-        document.getElementById("deleteAllBtn").onclick = async () => {
-            if (!confirm("WARNING: This will PERMANENTLY delete ALL blog posts! Are you sure?")) return;
-            
-            const messageEl = document.getElementById("admin-message");
-            messageEl.textContent = "Executing...";
-            messageEl.style.color = "orange";
-            
-            try {
-                const res = await fetch("/admin/delete-all-posts", { method: "DELETE" });
-                
-                if (await handleResponse(res)) {
-                    messageEl.textContent = "✅ All posts successfully deleted.";
-                    messageEl.style.color = "green";
-                    fetchBlogs();
-                } else {
-                    messageEl.textContent = "Deletion failed.";
-                    messageEl.style.color = "red";
-                }
-            } catch (error) {
-                console.error("Delete all error:", error);
-                messageEl.textContent = "Network error occurred.";
-                messageEl.style.color = "red";
-            }
-        };
-
-        async function fetchBlogs() {
-            try {
-                document.getElementById('loading-indicator').style.display = 'block';
-                const res = await fetch("/blogs");
-                if (!res.ok) {
-                     document.getElementById("blogs").innerHTML = "<p class='error-message'>Error fetching blogs.</p>";
-                     return;
-                }
-                const data = await res.json();
-                const blogs = data.blogs;
-                const container = document.getElementById("blogs");
-                container.innerHTML = "";
-                document.getElementById('loading-indicator').style.display = 'none';
-
-                if (blogs.length === 0) {
-                     container.innerHTML = "<p class='empty-message'>No posts to review.</p>";
-                     return;
-                }
-                
-                blogs.forEach(blog => {
-                    const div = document.createElement("div");
-                    div.className = "blog-post card";
-                    
-                    div.innerHTML = `
-                        <h3>${blog.title}</h3>
-                        <p class="author">Author: <b>${blog.authorName}</b> (${blog.author}) | ID: ${blog.id}</p>
-                        <p>Likes: ${blog.likes.length} | Dislikes: ${blog.dislikes.length} | Comments: ${blog.comments.length}</p>
-                        <button class="delete-btn btn danger" data-id="${blog.id}">Delete Post</button>
-                    `;
-                    
-                    div.querySelector('.delete-btn').onclick = (e) => handleDelete(e);
-                    container.appendChild(div);
-                });
-            } catch (error) {
-                console.error("Critical error in fetchBlogs:", error);
-                document.getElementById("blogs").innerHTML = "<p class='error-message'>Failed to load blog data.</p>";
+        async function deletePost(id) {
+            if(confirm('Delete this post?')) {
+                await fetch(`/delete/${id}`, { method: 'DELETE' });
+                loadAdminBlogs();
             }
         }
-        
-        async function handleDelete(e) {
-            const id = e.currentTarget.getAttribute("data-id");
-            if (!confirm(`ADMIN DELETION: Delete post ID ${id}?`)) return;
-
-            try {
-                const res = await fetch(`/delete/${id}`, { method: "DELETE" });
-                if (await handleResponse(res)) {
-                    alert('Post deleted successfully!');
-                    fetchBlogs();
-                }
-            } catch (error) { console.error("Delete error:", error); }
-        }
-
-        fetchBlogs();
+        loadAdminBlogs();
     </script>
 </body>
 </html>

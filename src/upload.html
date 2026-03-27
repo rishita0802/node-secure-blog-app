@@ -28,56 +28,22 @@
         </form>
     </main>
 
-    <script>
-        async function handleResponse(res) {
-            if (!res.ok) {
-                const contentType = res.headers.get("content-type");
-                let errorMessage = `Server responded with status ${res.status}`;
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await res.json();
-                    errorMessage = data.message || data.error || errorMessage;
-                } else {
-                    errorMessage = await res.text();
-                }
-                if (res.status === 401) {
-                    alert(`Action failed: ${errorMessage}. Redirecting to login.`);
-                    window.location.href = '/login';
-                } else {
-                    alert(`Error: ${errorMessage}`);
-                }
-                return false;
-            }
-            return true;
-        }
+<script>
+    document.getElementById("blogForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const submitMessage = document.getElementById("submit-message");
 
-        document.getElementById("blogForm").onsubmit = async (e) => {
-            e.preventDefault();
-            const form = e.target;
-            const formData = new FormData(form);
-            const submitMessage = document.getElementById("submit-message");
-            submitMessage.textContent = "Submitting...";
-            submitMessage.style.color = "gray";
-
-            try {
-                const res = await fetch("/submit", { method: "POST", body: formData });
-                
-                if (await handleResponse(res)) {
-                    submitMessage.textContent = "Blog submitted successfully! Redirecting...";
-                    submitMessage.style.color = "green";
-                    form.reset();
-                    setTimeout(() => {
-                        window.location.href = '/'; 
-                    }, 1500);
-                } else {
-                    submitMessage.textContent = "Blog submission failed.";
-                    submitMessage.style.color = "red";
-                }
-            } catch (error) {
-                console.error("Submission network error:", error);
-                submitMessage.textContent = "Network error: Could not connect to server.";
-                submitMessage.style.color = "red";
+        try {
+            const res = await fetch("/submit", { method: "POST", body: formData });
+            if (res.ok) {
+                submitMessage.textContent = "Success! Redirecting...";
+                setTimeout(() => { window.location.href = '/'; }, 1500);
+            } else {
+                alert("Failed to submit. Please login again.");
             }
-        };
-    </script>
+        } catch (error) { console.error(error); }
+    };
+</script>
 </body>
 </html>

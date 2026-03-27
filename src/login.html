@@ -8,8 +8,10 @@
     <main class="container card">
         <h1>Login</h1>
         <form action="/login" method="post" class="form-container">
-            <label for="email">Email:</label> 
-            <input type="email" id="email" name="email" required autocomplete="username"><br>
+            <!-- Label change kiya taaki user ko pata chale ki kya daalna hai -->
+            <label for="email">Username/Name:</label> 
+            <!-- 'name' attribute ko 'email' hi rehne diya taaki backend se match kare -->
+            <input type="text" id="email" name="email" required autocomplete="username"><br>
 
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required autocomplete="current-password"><br>
