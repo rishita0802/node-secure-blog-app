@@ -4,6 +4,10 @@ const bcrypt = require("bcrypt"); // 🚨 MUST BE INSTALLED: npm install bcrypt
 
 module.exports = async (req, res) => {
     const { email, password } = req.body;
+    console.log("BODY:", req.body);
+console.log("EMAIL:", email);
+console.log("PASSWORD:", password);
+
     const userFilePath = path.join(__dirname, "../user1.json");
 
     if (!email || !password) {
@@ -30,6 +34,8 @@ module.exports = async (req, res) => {
 
         // 🚨 Security Fix: Compare Hashed Password
         const isMatch = await bcrypt.compare(password, user.password);
+        console.log("BCRYPT RESULT:", isMatch);
+
 
         if (!isMatch) {
             return res.status(401).send("Invalid credentials");
